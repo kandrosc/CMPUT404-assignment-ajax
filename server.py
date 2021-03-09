@@ -27,6 +27,7 @@ import json
 app = Flask(__name__)
 app.debug = True
 
+
 # An example world
 # {
 #    'a':{'x':1, 'y':2},
@@ -74,27 +75,41 @@ def flask_post_json():
 @app.route("/")
 def hello():
     '''Return something coherent here.. perhaps redirect to /static/index.html '''
-    return None
+    with open("static/index.html","r") as f: html = f.read()
+    return html
 
 @app.route("/entity/<entity>", methods=['POST','PUT'])
 def update(entity):
     '''update the entities via this interface'''
-    return None
+    resp = request.json
+    if request.method == "POST":
+        key, value = resp["key"], resp["value"]
+        myWorld.update(entity,key,value)
+        return "The entity was updated!"
+    else:
+        exists = myWorld.get(entity)
+        if exists == {}:
+            myWorld.set(entity,resp)
+        else:
+            for key in resp.keys():
+                myWorld.update(entity,key,resp[key])
+        return {entity:resp}
 
 @app.route("/world", methods=['POST','GET'])    
 def world():
     '''you should probably return the world here'''
-    return None
+    return myWorld.world()
 
 @app.route("/entity/<entity>")    
 def get_entity(entity):
     '''This is the GET version of the entity interface, return a representation of the entity'''
-    return None
+    return myWorld.get(entity)
 
 @app.route("/clear", methods=['POST','GET'])
 def clear():
     '''Clear the world out!'''
-    return None
+    myWorld.clear()
+    return "The world was cleared!"
 
 if __name__ == "__main__":
     app.run()
