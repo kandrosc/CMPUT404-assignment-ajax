@@ -95,6 +95,19 @@ def update(entity):
                 myWorld.update(entity,key,resp[key])
         return {entity:resp}
 
+@app.route("/entity",methods=['PUT'])
+def put_many():
+    entities = request.json
+    for entity in entities.keys():
+        data = entities[entity]
+        exists = myWorld.get(entity)
+        if exists == {}:
+            myWorld.set(entity,data)
+        else:
+            for key in data.keys():
+                myWorld.update(entity,key,data[key])
+    return {}
+
 @app.route("/world", methods=['POST','GET'])    
 def world():
     '''you should probably return the world here'''

@@ -68,6 +68,7 @@ function sendJSONXMLHTTPRequest(url, objects, callback,method="POST") {
 
 
 world = {};
+put = {};
 
 
 //XXX: TODO Make this prettier!
@@ -105,7 +106,7 @@ function clearFrame() {
 }
 
 // This actually draws the frame
-function renderFrame(world) {
+function renderFrame() {
     clearFrame();
     for (var key in world) {
         var entity = world[key];
@@ -122,7 +123,7 @@ function drawNextFrame() {
 
 // This optionally draws the frame, call this if you're not sure if you should update
 // the canvas
-function drawFrame(world) {
+function drawFrame() {
     if (drawNext) {
         renderFrame(world);
         drawNext = false;
@@ -153,7 +154,8 @@ function addEntity(entity, data) {
     world[entity] = data;
     //drawNextFrame(); // (but should we?)
     //XXX: Send a XHTML Request that updates the entity you just  modified!
-    sendJSONXMLHTTPRequest("http://localhost:5000/entity/" + entity, data, function(resp){},method="PUT")
+    //sendJSONXMLHTTPRequest("http://localhost:5000/entity/" + entity, data, function(resp){},method="PUT")
+    put[entity] = data;
 
 
 }
@@ -269,6 +271,8 @@ mouse.mousedowners.push(function(x,y,clicked,e) {
 
 mouse.mouseuppers.push(function(x,y,clicked,e) {
     addEntityWithoutName({'x':x,'y':y,'colour':'red'});
+    sendJSONXMLHTTPRequest("http://localhost:5000/entity", put, function(resp){},method="PUT");
+    put = {}
 });
 
 mouse.mousedraggers.push(function(x,y,clicked,e) {
@@ -279,11 +283,12 @@ mouse.mousedraggers.push(function(x,y,clicked,e) {
 
 function update() {
     //XXX: TODO Get the world from the webservice using a XMLHTTPRequest
-    sendJSONXMLHTTPRequest("http://localhost:5000/world",{},function(resp){renderFrame(resp);});
+    //sendJSONXMLHTTPRequest("http://localhost:5000/world",{},function(resp){renderFrame(resp);});
+    renderFrame();
 }
 
 // 30 frames per second
-setInterval( update, 1000/5.0);
+setInterval( update, 1000/30.0);
 
 
 
