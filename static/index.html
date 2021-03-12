@@ -73,17 +73,24 @@ function loadWorld() {
 }
 
 //XXX: TODO Make this prettier!
+// gradient code came from: https://www.w3schools.com/Tags/tryit.asp?filename=tryhtml5_canvas_createradialgradient
 function drawCircle(context,entity) {
     with(context) {
         beginPath();              
         lineWidth = 3;
+        lightcolour = {"red":"lightcoral","blue":"lightskyblue","green":"lightgreen"}
         var x = entity["x"];
         var y = entity["y"];
+        var radius = entity["radius"];
+        var colour = entity["colour"]
+        var gradient = context.createRadialGradient(x, y, 5, x, y, radius);
+        gradient.addColorStop(0, colour);
+        gradient.addColorStop(1, lightcolour[colour]);
         //moveTo(x,y);
-        fillStyle = entity["colour"];
+        fillStyle = gradient;
         strokeStyle = fillStyle;
-        arc(x, y, (entity["radius"])?entity["radius"]:50, 0, 2.0 * Math.PI, false);  
-        stroke();                                
+        arc(x, y, (radius)?radius:50, 0, 2.0 * Math.PI, false);  
+        fill();                                
     }
 }
 
@@ -100,7 +107,10 @@ function prepEntity(entity) {
 function clearFrame() {
     with(context) {
 	moveTo(0,0);
-	fillStyle = "#000";
+    fillStyle = context.createRadialGradient(W/2,H/2,150,W/2,H/2,500);
+    fillStyle.addColorStop(0,"black");
+    fillStyle.addColorStop(1,"#3E434A");
+    
 	fillRect(0,0,W,H);
     }
 
@@ -289,10 +299,12 @@ function updateWorld(resp) {
     counter = (counter+ Object.entries(resp).length)%100;
 }
 
-
+var updatecounter = 0 // Used to delay updates to increase performance
 function update() {
     //XXX: TODO Get the world from the webservice using a XMLHTTPRequest
-    sendJSONXMLHTTPRequest("http://localhost:5000/client/"+client_id,{},function(resp){updateWorld(resp);renderFrame();},mehtod="GET");
+    if (updatecounter == 0){sendJSONXMLHTTPRequest("http://localhost:5000/client/"+client_id,{},function(resp){updateWorld(resp);},mehtod="GET");}
+    renderFrame();
+    updatecounter = (updatecounter+1)%7;
 }
 
 // 30 frames per second

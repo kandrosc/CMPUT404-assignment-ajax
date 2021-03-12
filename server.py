@@ -34,6 +34,7 @@ app.debug = True
 #    'b':{'x':2, 'y':3}
 # }
 
+# the general idea of clients came from: https://github.com/uofa-cmput404/cmput404-slides/blob/master/examples/ObserverExampleAJAX/server.py
 class World:
     def __init__(self):
         self.clear()
