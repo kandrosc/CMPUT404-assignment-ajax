@@ -64,8 +64,7 @@ class ServerTestCase(unittest.TestCase):
         r = self.app.get(('/entity/%s' % v))
         self.assertTrue(r.status_code == 200, "Code not 200!")
         self.assertTrue(json.loads(utf8(r.data)) == d, "D != r.data")
-
-        
+  
     def populateWorld(self):
         self.world = dict()
         for i in range(1,20):
@@ -91,7 +90,6 @@ class ServerTestCase(unittest.TestCase):
         newworld = json.loads(utf8(r.data))
         for key in self.world:
             self.assertTrue(self.world[key]  == newworld[key], "Key %s" % key)
-
 
         
         
