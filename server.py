@@ -45,12 +45,28 @@ class World:
 
     def set(self, entity, data):
         self.space[entity] = data
+        self.update_clients(entity,data)
 
     def clear(self):
         self.space = dict()
+        self.clients = {}
 
     def get(self, entity):
         return self.space.get(entity,dict())
+
+    def add_client(self,client_id):
+        self.clients[client_id] = {}
+
+    # each client object holds updates to the world
+    def get_client_updates(self,client_id):
+        return self.clients[client_id]
+
+    def clear_client(self,client_id):
+        self.clients[client_id] = {}
+
+    def update_clients(self,entity,data):
+        for client in self.clients:
+            self.clients[client][entity] = data
     
     def world(self):
         return self.space
@@ -87,12 +103,7 @@ def update(entity):
         myWorld.update(entity,key,value)
         return "The entity was updated!"
     else:
-        exists = myWorld.get(entity)
-        if exists == {}:
-            myWorld.set(entity,resp)
-        else:
-            for key in resp.keys():
-                myWorld.update(entity,key,resp[key])
+        myWorld.set(entity,resp)
         return {entity:resp}
 
 @app.route("/entity",methods=['PUT'])
@@ -100,13 +111,20 @@ def put_many():
     entities = request.json
     for entity in entities.keys():
         data = entities[entity]
-        exists = myWorld.get(entity)
-        if exists == {}:
-            myWorld.set(entity,data)
-        else:
-            for key in data.keys():
-                myWorld.update(entity,key,data[key])
+        myWorld.set(entity,data)
     return {}
+
+
+@app.route("/client/<client_id>", methods=["POST","PUT"])
+def add_client(client_id):
+    myWorld.add_client(client_id)
+    return {}
+
+@app.route("/client/<client_id>", methods=["GET"])
+def get_client_updates(client_id):
+    resp = myWorld.get_client_updates(client_id)
+    myWorld.clear_client(client_id)
+    return resp
 
 @app.route("/world", methods=['POST','GET'])    
 def world():
